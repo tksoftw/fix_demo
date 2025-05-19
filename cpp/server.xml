@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<fix8>
+    <session name="FIX44"
+             role="acceptor"
+             fix_version="FIX.4.4"
+             active="true"
+             heartbeat_interval="30"
+             ip="127.0.0.1"
+             port="5001"
+             sender_comp_id="SIM"
+             target_comp_id="CLIENT1"
+             tcp_nodelay="true"
+             process_model="threaded"
+             reset_sequence_numbers="true" />
+
+    <persist name="mem0"
+             type="mem" />
+
+    <log name="session_log"
+         type="session"
+         filename="log/session.log"
+         rotation="5"
+         flags="timestamp|sequence|compress|thread"/>
+
+    <log name="protocol_log"
+         type="protocol"
+         filename="log/protocol.log"
+         rotation="5"
+         flags="sequence|append|direction|inbound|outbound"/>
+</fix8>

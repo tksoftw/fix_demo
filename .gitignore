@@ -30,3 +30,14 @@
 *.exe
 *.out
 *.app
+
+# Python ignores
+__pycache__/
+.env
+
+# Further CPP ignores
+cpp/databento-cpp
+cpp/fix8-1.4.3/
+cpp/generated/
+cpp/build/
+cpp/.vscode/
