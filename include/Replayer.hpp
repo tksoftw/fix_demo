@@ -10,7 +10,6 @@
 #include "FIX44_types.hpp"
 #include "FIX44_router.hpp"
 #include "FIX44_classes.hpp"
-
 using namespace std;
 using namespace FIX8;
 
@@ -26,16 +25,16 @@ public:
     }
 };
 
-class Replayer {
+class BasicServer {
     unique_ptr<ServerSession<ConcreteSession>> server;
     unique_ptr<SessionInstanceBase> session;
 public:
-    explicit Replayer(const char* config_file);
-    ~Replayer();
+    explicit BasicServer(const char* config_file);
+    ~BasicServer();
 
     bool start(bool wait_for_logon = true);
     void stop();
-    void send_tick(const Tick& t);
+    void send_message(const FIX8::Message& msg);
 
     static constexpr std::chrono::milliseconds throttle{5};
 };

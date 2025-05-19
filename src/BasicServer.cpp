@@ -1,4 +1,4 @@
-#include "Replayer.hpp"
+#include "BasicServer.hpp"
 #include <fix8/f8includes.hpp>
 #include <fix8/message.hpp>
 #include "FIX44_types.hpp"
@@ -9,7 +9,7 @@
 #include <thread>
 #include <chrono>
 
-Replayer::Replayer(const char* config_file) {
+BasicServer::BasicServer(const char* config_file) {
     try {
         // Create server session that will handle connections
         server = make_unique<ServerSession<ConcreteSession>>(FIX8::FIX44::ctx(), config_file, "FIX44");
@@ -21,11 +21,11 @@ Replayer::Replayer(const char* config_file) {
     }
 }
 
-Replayer::~Replayer() {
+BasicServer::~BasicServer() {
     stop();
 }
 
-bool Replayer::start(bool wait_for_logon) {
+bool BasicServer::start(bool wait_for_logon) {
     if (!server) {
         cerr << "Server not initialized" << endl;
         return false;
@@ -60,7 +60,7 @@ bool Replayer::start(bool wait_for_logon) {
     }
 }
 
-void Replayer::stop() {
+void BasicServer::stop() {
     if (session) {
         try {
             cout << "Stopping session..." << endl;
@@ -73,62 +73,19 @@ void Replayer::stop() {
     }
 }
 
-void Replayer::send_tick(const Tick& t)
+void BasicServer::send_message(FIX8::Message& msg)
 {
     // guard against missing session
     if (!session || !session->session_ptr() || session->session_ptr()->is_shutdown()) {
-        std::cerr << "Cannot send tick – session not available or shutdown\n";
+        std::cerr << "Cannot send message - session not available or shutdown\n";
         return;
     }
 
     try {
-        // Compute price in FIX format
-        double px = static_cast<double>(t.price) / 1e9;
-        
-        /*
-        Build the message.
-        Mostly Hardcoding REQUIRED values...
-        */ 
-        FIX44::MarketDataSnapshotFullRefresh md; // Top-level message with header & instrument fields
-        md += new FIX44::MDReqID("SIM");
-        md += new FIX44::Symbol("AAPL");
-        md += new FIX44::SecurityType("CS");
-        
-        // Declare to send exactly 1 MDEntry group
-        md += new FIX44::NoMDEntries(1);
-
-        // Fetch the exact GroupBase Fix8 created for tag 268
-        auto* grps = md.find_group
-          <FIX44::MarketDataSnapshotFullRefresh::NoMDEntries>();
-
-        // Create the subgroup instance (one MDEntry)
-        auto* entry = grps->create_group(false);
-
-        // Populate the entry – Tag 269 (MDEntryType) MUST come first
-        *entry += new FIX44::MDEntryType(FIX44::MDEntryType_TRADE);
-        *entry += new FIX44::MDEntryPx(px);
-        *entry += new FIX44::MDEntrySize(t.size);
-
-        // Add UTC date/time
-        time_t now = t.timestamp / 1000000000;
-        tm* utc = gmtime(&now);
-        *entry += new FIX44::MDEntryDate(*utc);
-        *entry += new FIX44::MDEntryTime(*utc);
-
-        // Other FIX fields
-        *entry += new FIX44::MDMkt("SIM");
-        *entry += new FIX44::TradingSessionID("SIM");
-
-        // Attach the entry to the container for tag 268
-        grps->add(entry);
-
-        // Send
-        std::cout << "Sending market data: price=" << px
-                  << ", size=" << t.size << "\n";
-        session->session_ptr()->send(md);
+        // Send the message
+        session->session_ptr()->send(msg);
     }
-    catch (const std::exception& e) {
-        std::cerr << "Error sending tick: " << e.what() << "\n";
+    catch (std::exception& e) {
+        std::cerr << "Error sending message: " << e.what() << "\n";
     }
 }
-

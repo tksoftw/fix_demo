@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(tick_sim LANGUAGES CXX)
+project(fix8_test LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -18,10 +18,11 @@ find_package(Poco REQUIRED COMPONENTS Foundation Net)
 file(GLOB GENERATED_SOURCES "${CMAKE_SOURCE_DIR}/generated/*.cpp" "${CMAKE_SOURCE_DIR}/generated/*.hpp")
 
 # Executable and sources
-add_executable(tick_sim
-  src/main.cpp
-  src/Replayer.cpp
+add_executable(fix_replayer
+  src/fix_replayer.cpp
+  src/BasicServer.cpp
   src/DBNReader.cpp
+  src/TickToFIXAdapter.cpp
   ${GENERATED_SOURCES}
 )
 
@@ -32,11 +33,11 @@ add_executable(fix_client
 )
 
 # Include headers
-target_include_directories(tick_sim PRIVATE include "${CMAKE_SOURCE_DIR}/generated")
+target_include_directories(fix_replayer PRIVATE include "${CMAKE_SOURCE_DIR}/generated")
 target_include_directories(fix_client PRIVATE include "${CMAKE_SOURCE_DIR}/generated")
 
 # Link against Fix8, Poco, pthread
-target_link_libraries(tick_sim
+target_link_libraries(fix_replayer
   PRIVATE
     fix8
     databento::databento
