@@ -6,16 +6,14 @@
 #include <thread>
 #include <chrono>
 
-using namespace std;
-
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        cerr << "Usage: " << argv[0] << " <config_file> <dbn_file>" << endl;
+        std::cerr << "Usage: " << argv[0] << " <config_file> <dbn_file>" << std::endl;
         return 1;
     }
 
     const char* config_file = argv[1];
-    const string dbn_file = argv[2];
+    const std::string dbn_file = argv[2];
 
     try {
         // Initialize components
@@ -24,11 +22,11 @@ int main(int argc, char* argv[]) {
 
         // Start the FIX server
         if (!server.start(true)) {
-            cerr << "Failed to start FIX server" << endl;
+            std::cerr << "Failed to start FIX server" << std::endl;
             return 1;
         }
 
-        cout << "Server started, processing ticks..." << endl;
+        std::cout << "Server started, processing ticks..." << std::endl;
 
         // Process ticks
         Tick tick;
@@ -38,12 +36,12 @@ int main(int argc, char* argv[]) {
             server.send_message(msg);
         }
 
-        cout << "Finished processing ticks" << endl;
+        std::cout << "Finished processing ticks" << std::endl;
         server.stop();
         return 0;
     }
-    catch (const exception& e) {
-        cerr << "Error: " << e.what() << endl;
+    catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
 }

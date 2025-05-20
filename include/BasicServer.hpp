@@ -7,27 +7,25 @@
 #include <chrono>
 #include <memory>
 #include <iostream>
-#include "FIX44_types.hpp"
-#include "FIX44_router.hpp"
-#include "FIX44_classes.hpp"
-using namespace std;
-using namespace FIX8;
+#include "FIX44Session.hpp"
 
-class ConcreteSession : public Session {
-    FIX44::FIX44_Router router;
+namespace F44 = FIX8::FIX44;
+
+class ConcreteSession : public FIX8::Session {
+    F44::FIX44_Router router;
 public:
-    ConcreteSession(const F8MetaCntx& ctx, const sender_comp_id& sci, Persister *persist=nullptr,
-        Logger *logger=nullptr, Logger *plogger=nullptr) 
-        : Session(ctx, sci, persist, logger, plogger) {}
+    ConcreteSession(const FIX8::F8MetaCntx& ctx, const FIX8::sender_comp_id& sci, FIX8::Persister *persist=nullptr,
+        FIX8::Logger *logger=nullptr, FIX8::Logger *plogger=nullptr) 
+        : FIX8::Session(ctx, sci, persist, logger, plogger) {}
     
-    bool handle_application(const unsigned seqnum, const Message *&msg) override {
+    bool handle_application(const unsigned seqnum, const FIX8::Message *&msg) override {
         return msg->process(router);
     }
 };
 
 class BasicServer {
-    unique_ptr<ServerSession<ConcreteSession>> server;
-    unique_ptr<SessionInstanceBase> session;
+    std::unique_ptr<FIX8::ServerSession<FIX44Session>> server;
+    std::unique_ptr<FIX8::SessionInstanceBase> session;
 public:
     explicit BasicServer(const char* config_file);
     ~BasicServer();
@@ -35,6 +33,4 @@ public:
     bool start(bool wait_for_logon = true);
     void stop();
     void send_message(FIX8::Message& msg);
-
-    static constexpr std::chrono::milliseconds throttle{5};
 };
